@@ -1,24 +1,15 @@
-/************************************** THIRD-PARTY MODULES ***************************************/
+/*------------------------------------- THIRD-PARTY IMPORTS --------------------------------------*/
 import * as fs from 'fs';
 import * as path from 'path';
 import {REPLServer} from 'repl';
 
 import {path as rootPath} from 'app-root-path';
 
-import {
-    defineImmutableProp,
-    defineMutableProp,
-    getArgNames as getArgs,
-    inspectKeyTree,
-    isRegexString,
-    getFlagsFromRegexString,
-    removeSurroundingQuotes,
-    removeSlashesFlagsSurroundingRegexString,
-} from 'mad-utils/lib/shared';
+import {defineMutableProp} from 'mad-utils/lib/shared';
 
 const r = (global as any).r as REPLServer;
 
-/******************************************** HELPERS *********************************************/
+/*------------------------------------------- HELPERS --------------------------------------------*/
 /**
  * Is the given inode a directory?
  */
@@ -46,7 +37,7 @@ const buildLs = (dirPath: string): string[] =>
  */
 let curDir = process.cwd();
 
-/********************************************* EXPORT *********************************************/
+/*-------------------------------------------- EXPORT --------------------------------------------*/
 /**
  *  View content of current directory
  *  Labels directories with [D]
