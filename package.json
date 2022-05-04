@@ -1,6 +1,6 @@
 {
   "name": "node-cli-plus",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Reusable enhanced node.js repl that consumes .nodeplus file from project package is installed to",
   "main": "nodeplus.js",
   "bin": {
