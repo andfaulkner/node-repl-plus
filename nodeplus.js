@@ -14,7 +14,9 @@ const jsDom = new JSDOM.JSDOM();
 const augmentations = {};
 try {
     const nodeplus = require(process.cwd() + `/.nodeplus`);
-    console.log(`nodeplus:`, nodeplus);
+    // @ts-ignore
+    const {AWS, ...fields} = nodeplus;
+    console.log(`nodeplus:`, {AWS: Object.keys(AWS), ...fields});
     Object.keys(nodeplus).forEach(key => (augmentations[key] = nodeplus[key]));
     // console.log(`augmentations:`, augmentations);
 } catch (e) {
