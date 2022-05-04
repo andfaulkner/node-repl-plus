@@ -13,5 +13,8 @@
     "repl"
   ],
   "author": "Andrew Faulkner",
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+    "@andfaulkner/repl.history": "^0.2.0"
+  }
 }
