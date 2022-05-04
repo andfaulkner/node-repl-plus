@@ -49,7 +49,7 @@ try {
     console.error(`Error:`, err);
 }
 
-/**************************************** PROJECT IMPORTS *****************************************/
+/*--------------------------------------- PROJECT MODULES ----------------------------------------*/
 const {
     // @ts-ignore
     bindPropsToRepl,
@@ -92,7 +92,7 @@ const {
     set
 } = shellJS;
 
-/********************************** REPL NODE ENVIRONMENT SETUP ***********************************/
+/*--------------------------------- REPL NODE ENVIRONMENT SETUP ----------------------------------*/
 util.inspect.defaultOptions.colors = true;
 util.inspect.defaultOptions.depth = 2;
 util.inspect.defaultOptions.breakLength = 100;
@@ -129,7 +129,7 @@ Object.defineProperty(global.Function.prototype, `toS`, {
 const nJvlnsLine = `\n          `;
 const nJsLine = `\n                  `;
 
-/************************************** CONFIG REPL CONTEXT ***************************************/
+/*------------------------------------- CONFIG REPL CONTEXT --------------------------------------*/
 /**
  * Properties to bind to repl context (available at top level in repl)
  */
@@ -218,10 +218,3 @@ Reflect.defineProperty(r.context, 'pwd', {
         return process.cwd();
     }
 });
-
-// r.context['pwd'] = {
-//         get val() {
-//             return process.cwd();
-//         },
-//         mutable: true
-//     }
