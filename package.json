@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "description": "Reusable enhanced node.js repl that consumes .nodeplus file from project package is installed to",
   "main": "nodeplus.js",
+  "bin": {
+      "nodeplus": "./nodeplus.js"
+  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
