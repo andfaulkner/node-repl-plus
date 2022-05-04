@@ -1,0 +1,54 @@
+# MacOS temp files & dirs
+.DS_Store
+.Trashes
+.Spotlight-V100
+.trash
+
+# Dependency directories
+node_modules
+
+# Optional npm cache directories
+.npm
+.npmrc
+
+# REPL history files
+.node_history
+.node_repl_history
+repl-history
+
+######### IDE files ##########
+# Sublime
+*.sublime-workspace
+*.sublime-project
+
+# Visual Studio Code (VSCode)
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+# IDE history storage
+.history/**
+
+# vim swapfile
+*.swp
+
+# IDE - IntelliJ - User-specific stuff
+.idea/**/workspace.xml
+.idea/**/tasks.xml
+.idea/**/usage.statistics.xml
+.idea/**/dictionaries
+.idea/**/shelf
+
+# IDE - IntelliJ - Generated files
+.idea/**/contentModel.xml
+
+# IDE - IntelliJ - Sensitive or high-churn files
+.idea/**/dataSources/
+.idea/**/dataSources.ids
+.idea/**/dataSources.local.xml
+.idea/**/sqlDataSources.xml
+.idea/**/dynamic.xml
+.idea/**/uiDesigner.xml
+.idea/**/dbnavigator.xml
