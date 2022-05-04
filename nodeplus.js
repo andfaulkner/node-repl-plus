@@ -25,7 +25,7 @@ Object.defineProperty(global, 'window', {value: jsDom.window, enumerable: false}
 Object.defineProperty(global, 'document', {value: jsDom.window.document, enumerable: false});
 Object.defineProperty(global, 'navigator', {value: jsDom.window.navigator, enumerable: false});
 
-/************************************** THIRD-PARTY IMPORTS ***************************************/
+/*------------------------------------ THIRD-PARTY COMPONENTS ------------------------------------*/
 require('./augment-global-prototypes/augment-global-prototypes');
 
 const moment = require('moment');
@@ -35,12 +35,8 @@ const lodash = require('lodash');
 const madUtils = require('mad-utils/lib/node');
 
 const fs = require('fs');
-const path = require('path');
-const repl = require('repl');
 const util = require('util');
 const fetch = require('isomorphic-fetch');
-const appRootPath = require('app-root-path');
-const rootPath = appRootPath.path;
 
 // ShellJS
 const shellJS = require('shelljs');
@@ -55,6 +51,7 @@ try {
 
 /**************************************** PROJECT IMPORTS *****************************************/
 const {
+    // @ts-ignore
     bindPropsToRepl,
     // cat,
     cd,
@@ -93,7 +90,7 @@ const {
     rm,
     sed,
     set
-} = require('shelljs');
+} = shellJS;
 
 /********************************** REPL NODE ENVIRONMENT SETUP ***********************************/
 util.inspect.defaultOptions.colors = true;

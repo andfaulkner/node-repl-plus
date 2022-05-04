@@ -1,6 +1,6 @@
 // @ts-check
 
-/************************************** THIRD-PARTY MODULES ***************************************/
+/*------------------------------------ THIRD-PARTY COMPONENTS ------------------------------------*/
 /**
  * Lodash module
  */
@@ -10,11 +10,10 @@ const fs = require('fs');
 const path = require('path');
 const repl = require('repl');
 const util = require('util');
-const vm = require('vm');
 
 // @ts-ignore
 const commonTags = require('common-tags');
-const {oneLine} = commonTags;
+const oneLine = commonTags.oneLine;
 
 // @ts-ignore
 const appRootPath = require('app-root-path');
@@ -24,8 +23,8 @@ const rootPath = appRootPath.path;
 const madUtils = require('mad-utils/lib/shared');
 
 const {
+    // @ts-ignore
     defineImmutableProp,
-    defineMutableProp,
     getArgNames,
     inspectKeyTree,
     isRegexString,
@@ -38,7 +37,7 @@ const {
 
 const getArgs = getArgNames;
 
-/******************************************* START REPL *******************************************/
+/*------------------------------------------ START REPL ------------------------------------------*/
 const prompt = `> `;
 
 // @ts-ignore
@@ -58,22 +57,12 @@ const r = repl.start({
         if (output === `--<__BLOCK_OUTPUT__>--`) return ``;
         return util.inspect(output);
     }
-    // eval: (cmd, context, filename, callback) => {
-    //     const cleanCmd = cmd.replace(/\n$/, ``);
-    //     // console.log(`callback:`, callback.toString());
-    //     if (!cleanCmd) {
-    //         r.clearBufferedCommand();
-    //         process.stdout.write(prompt);
-    //     } else {
-    //         callback(null, vm.runInThisContext(cleanCmd));
-    //     }
-    // }
 });
 
 // Add REPL history file
-const historyFile = path.join(rootPath, `.node_history`);
+const replHistory = require('@andfaulkner/repl.history');
 
-const replHistory = require('./repl.history/index');
+const historyFile = path.join(rootPath, `.node_history`);
 replHistory(r, historyFile);
 
 // Add IN_REPL property to repl environment
@@ -111,7 +100,7 @@ const displayProps = (ctxProps, descriptions) => {
     process.stdout.write(prompt || `> `);
 };
 
-/******************************************** HELPERS *********************************************/
+/*------------------------------------------- HELPERS --------------------------------------------*/
 /**
  * Bind given properties to the repl context, with the given values
  * Display as list on repl load, with descriptions for each specified in
@@ -149,9 +138,10 @@ const bindPropsToRepl = (ctxProps, descriptions, prompt) => {
     return r;
 };
 
-/******************************************* LOGGING *********************************************/;
+/*------------------------------------------- LOGGING --------------------------------------------*/
 /**
- * Run when inspect is called in the repl
+ * Run when inspect is called in the repl.
+ * @param {any[]} args Items to inspect
  */
 const inspect = (...args) => {
     console.log(
@@ -167,9 +157,10 @@ const inspect = (...args) => {
 defineImmutableProp(inspect, `getArgs`, getArgs);
 
 /**
- * Powerful key inspection tool
- * Shows keys of object and all objects in its prototype chain
- * Displays object name at each layer in the chain
+ * Powerful key inspection tool.
+ * Shows keys of object and all objects in its prototype chain.
+ * Displays object name at each layer in the chain.
+ *
  * @param {Object} obj Object to get the keys of
  * @param {Object} showHidden If true, also display hidden keys
  * @param {boolean} showKeyPosInProtoChain If true, log objects showing each
@@ -188,26 +179,13 @@ const keys = (obj, showHidden = true, showKeyPosInProtoChain = false) => {
     return allKeys;
 };
 
-/***************************** DIRECTORIES / NAVIGATION / FILESYSTEM ******************************/
+/*---------------------------- DIRECTORIES / NAVIGATION / FILESYSTEM -----------------------------*/
 /**
  * Is the given iNode (file, dir, socket, etc) a directory?
  * @param {string} iNode path
  * @return {boolean}
  */
 const isDir = iNode => fs.lstatSync(iNode).isDirectory();
-
-/**
- * Is the given path an absolute path?
- * @param {string} newPath
- * @return {boolean}
- */
-const isAbsPath = newPath => !!newPath.match(/^\//);
-
-/**
- * @param {string} newPath
- * @return {boolean} True if directory is within project
- */
-const isWithinProj = newPath => !!newPath.match(new RegExp(`^` + rootPath));
 
 /**
  * Build list of all directories in given inode
@@ -236,18 +214,6 @@ let ls = buildLs(curDir);
  * @param {string} newPath Relative or absolute path to chagne directory to
  */
 const cd = newPath => {
-    // Temp storage of path
-    // const curDirTemp = `` + curDir;
-
-    // // Handle absolute vs relative paths appropriately
-    // curDir = isAbsPath(newPath) ? newPath : path.join(curDir, newPath);
-
-    // // Prevent navigation out of project directory
-    // if (!isWithinProj(curDir)) {
-    //     curDir = curDirTemp;
-    //     return console.log(`ERROR :: Cannot navigate below project root: ${rootPath}`);
-    // }
-
     // Ensure cd succeeds - roll back stored current directory if it fails
     try {
         process.chdir(newPath);
@@ -259,12 +225,6 @@ const cd = newPath => {
     }
 
     return curDir;
-
-    // // Store new path and path dir contents in appropriate global properties
-    // defineMutableProp(r.context, `pwd`, curDir);
-    // ls = buildLs(curDir);
-    // defineMutableProp(r.context, `ls`, ls);
-    // return curDir;
 };
 
 /**
@@ -277,12 +237,12 @@ const cat = filePath =>
         .toString()
         .split(`\n`);
 
-/******************************************** HISTORY *********************************************/
+/*------------------------------------------- HISTORY --------------------------------------------*/
 /**
  * Display REPL history. Only include items matching matchInput
  * @param {boolean} showNums If true, display line # beside each command
  *                           e.g. [741] const a = `zz`
- * @param {RegExp|string} [matchInput] Only display items containing the given string
+ * @param {RegExp|string} [matchInput] Only display items containing the given string // @ts-ignore
  *                        Excludes bookend quotes, but uses all spaces etc
  *                        between them as the value
  */
@@ -341,7 +301,7 @@ const filteredHist = function filteredHistNoNum(showNums = true) {
     };
 };
 
-/************************************** ADD CUSTOM COMMANDS ***************************************/
+/*------------------------------------- ADD CUSTOM COMMANDS --------------------------------------*/
 /**
  * Filtered repl history with numbered lines
  */
