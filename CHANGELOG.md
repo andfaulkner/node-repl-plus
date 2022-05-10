@@ -7,6 +7,8 @@ History file
 
 Project config/docs
 -------------------
+-   Add README.md file
+-   Add example .nodeplus config file
 -   Add .editorconfig file
 -   Add CHANGELOG
 -   Add prettier
