@@ -26,5 +26,8 @@
     "lodash": "^4.17.21",
     "mad-utils": "^0.93.1",
     "shelljs": "^0.8.5"
+  },
+  "devDependencies": {
+    "prettier": "^2.6.2"
   }
 }
