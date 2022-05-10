@@ -57,10 +57,10 @@ export const cd = (newPath: string) => {
     curDir = isAbsPath(newPath) ? newPath : path.join(curDir, newPath);
 
     // Prevent navigation out of project directory
-    if (!isWithinProj(curDir)) {
-        curDir = curDirTemp;
-        return console.log(`ERROR :: Cannot navigate below project root: ${rootPath}`);
-    }
+    // if (!isWithinProj(curDir)) {
+    //     curDir = curDirTemp;
+    //     return console.log(`ERROR :: Cannot navigate below project root: ${rootPath}`);
+    // }
 
     // Ensure cd succeeds - roll back stored current directory if it fails
     try {
