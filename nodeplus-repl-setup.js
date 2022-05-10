@@ -59,11 +59,16 @@ const r = repl.start({
     }
 });
 
-// Add REPL history file
+//----- Add REPL history file -----//
 const replHistory = require('@andfaulkner/repl.history');
 
-const historyFile = path.join(rootPath, `.node_history`);
+const pwd = process.env.PWD;
+const historyFile = path.join(pwd, `.node_cli_plus_history`);
 replHistory(r, historyFile);
+
+console.log(`process.env.PWD:`, process.env.PWD);
+console.log(`historyFile:`, historyFile);
+//---------------------------------//
 
 // Add IN_REPL property to repl environment
 // Acts as identifier that REPL is currently running
@@ -200,7 +205,7 @@ const buildLs = dirPath =>
  * WARNING: MUST BE STORED AS MUTABLE VALUE!
  */
 let curDir = process.cwd();
-console.log("curDir:", curDir);
+console.log('curDir:', curDir);
 
 /**
  *  View content of current directory. Labels directories with [D]
@@ -231,11 +236,7 @@ const cd = newPath => {
  * Output content of file at given relative or absolute path (if possible)
  * @param {string} filePath
  */
-const cat = filePath =>
-    fs
-        .readFileSync(filePath)
-        .toString()
-        .split(`\n`);
+const cat = filePath => fs.readFileSync(filePath).toString().split(`\n`);
 
 /*------------------------------------------- HISTORY --------------------------------------------*/
 /**
@@ -246,30 +247,32 @@ const cat = filePath =>
  *                        Excludes bookend quotes, but uses all spaces etc
  *                        between them as the value
  */
-const history = (showNums = true) => (matchInput = ``) => {
-    const currentHistory = util.inspect.defaultOptions.maxArrayLength;
-    util.inspect.defaultOptions.maxArrayLength = null;
+const history =
+    (showNums = true) =>
+    (matchInput = ``) => {
+        const currentHistory = util.inspect.defaultOptions.maxArrayLength;
+        util.inspect.defaultOptions.maxArrayLength = null;
 
-    // Get history from the repl history file
-    const lines = cat(historyFile).map((hist, idx) => [idx, hist]);
+        // Get history from the repl history file
+        const lines = cat(historyFile).map((hist, idx) => [idx, hist]);
 
-    // Filter non-matching lines out (if filtering is being done)
-    const matcher = typeof matchInput === `string` ? new RegExp(matchInput) : matchInput;
-    const outLines =
-        matchInput && matcher instanceof RegExp
-            ? lines.filter(hist => {
-                  const matchInHist = hist[1];
-                  return typeof matchInHist === 'string' && matcher.test(matchInHist);
-              })
-            : lines;
+        // Filter non-matching lines out (if filtering is being done)
+        const matcher = typeof matchInput === `string` ? new RegExp(matchInput) : matchInput;
+        const outLines =
+            matchInput && matcher instanceof RegExp
+                ? lines.filter(hist => {
+                      const matchInHist = hist[1];
+                      return typeof matchInHist === 'string' && matcher.test(matchInHist);
+                  })
+                : lines;
 
-    // Display all lines not filtered out
-    outLines.forEach(outLine =>
-        showNums ? console.log(` [${outLine[0]}]  ${outLine[1]}`) : console.log(`${outLine[1]}`)
-    );
+        // Display all lines not filtered out
+        outLines.forEach(outLine =>
+            showNums ? console.log(` [${outLine[0]}]  ${outLine[1]}`) : console.log(`${outLine[1]}`)
+        );
 
-    util.inspect.defaultOptions.maxArrayLength = currentHistory;
-};
+        util.inspect.defaultOptions.maxArrayLength = currentHistory;
+    };
 
 /**
  * Create filterable command history
@@ -332,5 +335,5 @@ module.exports = {
     cd,
     ls,
     cat,
-    history,
+    history
 };
