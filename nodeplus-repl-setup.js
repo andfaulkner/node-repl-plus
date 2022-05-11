@@ -77,20 +77,21 @@ defineImmutableProp(r.context.process.env, `IN_REPL`, true);
 /**
  * Display props bound to repl context, with descriptions for each specified in
  * descriptions prop
- * @param {Object} ctxProps - Bind each given value to its corresponding key
- *                            e.g. {_: lodash, _m: madUtils, Promise: bluebird}
- * @param {Object} descriptions - Optional matching descriptions to display
- *                                beside prop with given key :: {[key: string]: string}
- *                 e.g.: {_: `lodash alias`, bluebird: `promises library`}
+ * @param {Record<string, function | Record<string, any>>} ctxProps
+ *        Object mapping top-level context values to their corresponding keys, where values
+ *        are libraries or namespaces, and keys are how they're globally referenced. e.g.:
+ *        {_m: madUtils, Promise: bluebird}
+ * @param {Record<string, string>} descriptions Optional matching descriptions to show
+ *                                              beside prop w given key. e.g.:
+ *                                              {_: 'lodash alias', bluebird: 'promise library'}
  */
 const displayProps = (ctxProps, descriptions) => {
     console.log(`\nCustom properties bound to the top-level context:`);
 
-    // Iterate through the given context properties
-    /**
-     * @param {string} key
-     * @param {Object} val
-     */
+    // Store definitions already displayed (to avoid showing when iterating thru definitions obj).
+    let defsToShow = {};
+
+    // Iterate through given context properties & display them
     for (let [key, val] of _.toPairs(ctxProps)) {
         // Display prop and (if defined) prop description on repl boot
         if (descriptions[key]) {
@@ -99,6 +100,14 @@ const displayProps = (ctxProps, descriptions) => {
             defineImmutableProp(val, `__repl_description__`, descriptions[key]);
         } else {
             console.log(` * ${key}`);
+        }
+        defsToShow[key] = true;
+    }
+
+    // Display standalone definitions
+    for (let [def, desc] of _.toPairs(descriptions)) {
+        if (!defsToShow[def]) {
+            console.log(` * ${def}: ${desc}`);
         }
     }
 
@@ -243,7 +252,8 @@ const cat = filePath => fs.readFileSync(filePath).toString().split(`\n`);
  * Display REPL history. Only include items matching matchInput
  * @param {boolean} showNums If true, display line # beside each command
  *                           e.g. [741] const a = `zz`
- * @param {RegExp|string} [matchInput] Only display items containing the given string // @ts-ignore
+// @ts-ignore
+ * @param {RegExp|string} [matchInput] Only display items containing the given string
  *                        Excludes bookend quotes, but uses all spaces etc
  *                        between them as the value
  */
