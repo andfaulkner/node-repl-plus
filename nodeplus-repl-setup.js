@@ -1,6 +1,8 @@
 // @ts-check
 
 /*------------------------------------ THIRD-PARTY COMPONENTS ------------------------------------*/
+require('./augment-global-prototypes/augment-global-prototypes');
+
 /**
  * Lodash module
  */
@@ -12,15 +14,12 @@ const repl = require('repl');
 const util = require('util');
 
 // @ts-ignore
-const commonTags = require('common-tags');
-const oneLine = commonTags.oneLine;
-
-// @ts-ignore
-const appRootPath = require('app-root-path');
-const rootPath = appRootPath.path;
-
-// @ts-ignore
 const madUtils = require('mad-utils/lib/shared');
+
+//--------------- Import & type array-sort module ---------------//
+const {orderBy} = require('natural-orderby');
+
+//---------------------------------------------------------------//
 
 const {
     // @ts-ignore
@@ -84,31 +83,83 @@ defineImmutableProp(r.context.process.env, `IN_REPL`, true);
  * @param {Record<string, string>} descriptions Optional matching descriptions to show
  *                                              beside prop w given key. e.g.:
  *                                              {_: 'lodash alias', bluebird: 'promise library'}
+ * @param {Record<string, string>} [essentialDescs] Essential descriptions, to show below others.
+
  */
-const displayProps = (ctxProps, descriptions) => {
+const displayProps = (ctxProps, descriptions, essentialDescs) => {
     console.log(`\nCustom properties bound to the top-level context:`);
 
-    // Store definitions already displayed (to avoid showing when iterating thru definitions obj).
-    let defsToShow = {};
+    /**
+     * Stores definitions already collected (to avoid storing again when iterating
+     * thru next definitions/props obj).
+     * @type {Record<string, boolean>} Where the string key is the "term" being defined.
+     */
+    let defsSeen = {};
+    /**
+     * Essential defintions to show.
+     * @type {string[]}
+     */
+    let essDefsToShow = [];
+    /**
+     * Standard defintions to show.
+     * @type {string[]}
+     */
+    let defsToShow = [];
+
+    // Iterate through essential defs, and store for later display.
+    if (essentialDescs) {
+        // Get longest essential definition
+        const longestEssDesc = Object.keys(essentialDescs).reduce(
+            (acc, curDef) => (acc > curDef.length ? acc : curDef.length),
+            0
+        );
+        for (let [def, desc] of _.toPairs(essentialDescs)) {
+            // @ts-ignore
+            const defPadded = `* ${def}:`.padRight(longestEssDesc + 4);
+            essDefsToShow.push(`${defPadded} ${desc}`);
+            defsSeen[def] = true;
+        }
+    }
+
+    // Get longest non-essential definition
+    const longestDesc = Object.keys({...descriptions, ...ctxProps}).reduce(
+        (acc, curDef) => (acc > curDef.length ? acc : curDef.length),
+        0
+    );
 
     // Iterate through given context properties & display them
     for (let [key, val] of _.toPairs(ctxProps)) {
+        if (defsSeen[key]) continue;
+
         // Display prop and (if defined) prop description on repl boot
         if (descriptions[key]) {
-            console.log(` * ${key}: ${descriptions[key]}`);
+            // @ts-ignore
+            const defPadded = `* ${key}:`.padRight(longestDesc + 4);
+            defsToShow.push(`${defPadded} ${descriptions[key]}`);
             // If prop description provided, bind it to the object in the context
             defineImmutableProp(val, `__repl_description__`, descriptions[key]);
         } else {
-            console.log(` * ${key}`);
+            defsToShow.push(`* ${key}`);
         }
-        defsToShow[key] = true;
+        defsSeen[key] = true;
     }
 
     // Display standalone definitions
     for (let [def, desc] of _.toPairs(descriptions)) {
-        if (!defsToShow[def]) {
-            console.log(` * ${def}: ${desc}`);
+        if (!defsSeen[def]) {
+            // @ts-ignore
+            const defPadded = `* ${def}:`.padRight(longestDesc + 4);
+            defsToShow.push(`${defPadded} ${desc}`);
         }
+    }
+
+    // Sort and output descriptions.
+    orderBy(defsToShow).forEach(row => console.log(row));
+
+    // Sort and output essential descriptions (to display at bottom).
+    if (essentialDescs) {
+        console.log(`----------`);
+        orderBy(essDefsToShow).forEach(row => console.log(row));
     }
 
     process.stdout.write(prompt || `> `);
@@ -127,10 +178,12 @@ const displayProps = (ctxProps, descriptions) => {
  * @param {Object} descriptions - Optional matching descriptions to display
  *                                beside prop with given key :: {[key: string]: string}
  *                 e.g.: {_: `lodash alias`, bluebird: `promises library`}
- * @param {string} [prompt] - Prompt string
+ * @param {string} [prompt] Prompt string
+ * @param {{essentialDescs?: Record<string, string>}} [opts] Optional params.
+ *          opts.essentialDescs = Essential descriptions, to show below other descriptions.
  * @return {repl.REPLServer} REPL object
  */
-const bindPropsToRepl = (ctxProps, descriptions, prompt) => {
+const bindPropsToRepl = (ctxProps, descriptions, prompt, opts) => {
     console.log(`\nWelcome to the enhanced Node.js REPL!`);
 
     // Iterate through the given context properties
@@ -148,7 +201,7 @@ const bindPropsToRepl = (ctxProps, descriptions, prompt) => {
         }
     }
 
-    displayProps(ctxProps, descriptions);
+    displayProps(ctxProps, descriptions, opts.essentialDescs);
     return r;
 };
 
@@ -320,9 +373,9 @@ const filteredHist = function filteredHistNoNum(showNums = true) {
  */
 // @ts-ignore
 r.defineCommand(`hist`, {
-    help: oneLine`
-        Display all repl history items matching given string (or full history if none
-        given), with a line number included to the left of each line e.g. [1852] var i = 14;`,
+    help:
+        `Display all repl history items matching given string (or full history if none ` +
+        `given), with a line number included to the left of each line e.g. [1852] var i = 14;`,
     action: filteredHist(true)
 });
 
@@ -331,8 +384,9 @@ r.defineCommand(`hist`, {
  */
 // @ts-ignore
 r.defineCommand(`histnonum`, {
-    help: oneLine`Display all repl history items matching given string
-                  (or full history if none given), with no line number included`,
+    help:
+        `Display all repl history items matching given string (or full history if ` +
+        `none given), with no line number included`,
     action: filteredHist(false)
 });
 

@@ -106,26 +106,17 @@ const ctxProps = {
     chmod: shellJS.chmod,
     cp: shellJS.cp,
     dirs: shellJS.dirs,
-    echo: shellJS.echo,
-    exec: shellJS.exec,
     exit: shellJS.exit,
     find: shellJS.find,
     grep: shellJS.grep,
     uniq: shellJS.uniq,
     which: shellJS.which,
     touch: shellJS.touch,
-    test: shellJS.test,
     sort: shellJS.sort,
-    tail: shellJS.tail,
-    head: shellJS.head,
     ln: shellJS.ln,
     mkdir: shellJS.mkdir,
     mv: shellJS.mv,
-    popd: shellJS.popd,
-    pushd: shellJS.pushd,
     rm: shellJS.rm,
-    sed: shellJS.sed,
-    ['set']: shellJS.set,
 
     // Helper libraries
     lodash,
@@ -154,12 +145,26 @@ const ctxProps = {
 global.temp = null;
 
 /*----------------------------------------- DESCRIPTIONS -----------------------------------------*/
+/** @type {string[]} List of essential defintions exported from .nodeplus */
+const essDefsList = (augmentations && augmentations['__essential_defs__']) || [];
+
+/**
+ * Object with all essential description additions
+ * @type {Record<string, string>}
+ */
+const essDescAdditions = {};
 /**
  * Object containing all __repl_description__ data (for use in help text).
  * @type Record<string, string>
  */
 const descAdditions = Object.keys(augmentations).reduce((acc, key) => {
-    if (augmentations[key].__repl_description__) acc[key] = augmentations[key].__repl_description__;
+    if (essDefsList.includes(key)) {
+        essDescAdditions[key] =
+            (augmentations[key] && augmentations[key].__repl_description__) ||
+            `${key} ${typeof key === 'function' ? 'function' : 'property'}`;
+    } else if (augmentations[key].__repl_description__) {
+        acc[key] = augmentations[key].__repl_description__;
+    }
     return acc;
 }, {});
 
@@ -168,21 +173,32 @@ const descAdditions = Object.keys(augmentations).reduce((acc, key) => {
  * @type Record<string, string>
  */
 const descriptions = {
-    _: `Result of last command`,
-    ld: `lodash alias`,
-    m_: `mad-utils alias`,
+    ld: `lodash module alias.`,
+    m_: `mad-utils module alias.`,
     // TODO pwd description not showing
-    pwd: `Show current working directory (like pwd in bash)`,
-    temp: `Predefined temporary global variable used for storing results of function calls`,
-    Function: `Standard global has added property 'toS' for displaying as a clean string`,
+    pwd: `Show current working directory (like pwd in bash).`,
     ...descAdditions
 };
+
+/**
+ * Essential descriptions to show at bottom of display.
+ */
+const essentialDescs = {
+    _: `Result of last command.`,
+    Function: `Standard global has added property 'toS' for displaying as a clean string.`,
+    packageJson: `Content of project's package.json file as a JSON object.`,
+    temp: `Predefined temporary global variable used for storing results of function calls.`,
+    ...essDescAdditions
+};
+
+// Remove essential definitions magic field from return object.
+if (ctxProps['__essential_defs__']) delete ctxProps['__essential_defs__'];
 
 /**
  * Attach props to REPL (note: this is done in the bindPropsToRepl function), including all
  * descriptions. Return repl object with all properties bound to its global namespace.
  */
-const repl = bindPropsToRepl(ctxProps, descriptions, `> `);
+const repl = bindPropsToRepl(ctxProps, descriptions, `> `, {essentialDescs});
 
 /*--------------------------------------- CUSTOM COMMANDS ----------------------------------------*/
 /**
@@ -190,7 +206,7 @@ const repl = bindPropsToRepl(ctxProps, descriptions, `> `);
  */
 repl.defineCommand(`help_added_globals`, {
     help: `Display custom objects/functions added to the top-level context`,
-    action: () => displayProps(ctxProps, descriptions)
+    action: () => displayProps(ctxProps, descriptions, essentialDescs)
 });
 
 /**
