@@ -98,17 +98,17 @@ const apiFetch = (route, method = 'GET', body = {}, verbose = false) => {
 
 // Attach replDescription__ property to a function to make the description appear in the CLI help
 // output for the associated function.
-apiFetch.__repl_description__ = `Make API request to local server, with all config (e.g. auth headers) take care of.`;
+apiFetch['__repl_description__'] = `Make API request to local server, with all config (e.g. auth headers) take care of.`;
 
 /*--------------------------------------------- DB -----------------------------------------------*/
 // Can add a DB connector, and a function to automatically make calls to the database via the automatically created connection.
-
 
 /*----------------------------------- MISC ADDITIONAL IMPORTS ------------------------------------*/
 // `npm install --save array-sort` to get access to this
 const arraySort = require('array-sort');
 // `npm install --save mathjs` to get access to this
 const mathJs = require('mathjs');
+mathJs['__repl_description__'] = `Public module for handling complex mathematical operations.`
 
 /*-------------------------------------------- EXPORT --------------------------------------------*/
 // Anything exported here becomes accessible at the top level in the CLI e.g. this would work:
@@ -117,4 +117,7 @@ module.exports = {
     apiFetch,
     arraySort,
     mathJs,
+    // Any field listed here goes in the "essential descriptions" section below all other descriptions,
+    // shown when added globals are displayed on calling .help_added_globals called, or on REPL boot.
+    __essential_defs__: ['apiFetch', 'mathJs'],
 };
