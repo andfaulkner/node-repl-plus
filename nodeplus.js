@@ -54,49 +54,13 @@ try {
 }
 
 /*--------------------------------------- PROJECT MODULES ----------------------------------------*/
-const {
-    // @ts-ignore
-    bindPropsToRepl,
-    // cat,
-    cd,
-    ls,
-    pwd,
-    inspect,
-    keys,
-    displayProps
-} = require('./nodeplus-repl-setup');
-
-const {
-    cat,
-    // cd,
-    chmod,
-    cp,
-    dirs,
-    echo,
-    exec,
-    exit,
-    find,
-    grep,
-    uniq,
-    which,
-    touch,
-    test,
-    sort,
-    tail,
-    head,
-    ln,
-    // ls,
-    mkdir,
-    mv,
-    popd,
-    pushd,
-    // pwd,
-    rm,
-    sed,
-    set
-} = shellJS;
+// Grab custom CLI commands from nodeplus-repl-setup
+const {bindPropsToRepl, cd, ls, inspect, keys, displayProps} = require('./nodeplus-repl-setup');
 
 /*--------------------------------- REPL NODE ENVIRONMENT SETUP ----------------------------------*/
+/*
+ * Configure default inspect options.
+ */
 util.inspect.defaultOptions.colors = true;
 util.inspect.defaultOptions.depth = 2;
 util.inspect.defaultOptions.breakLength = 100;
@@ -104,7 +68,7 @@ util.inspect.defaultOptions.showHidden = false;
 util.inspect.defaultOptions.maxArrayLength = Infinity;
 
 /**
- * Augment functions with toS function providing a function source output that
+ * Augment all functions with toS function providing a function source output that
  * is more readble in a REPL environment
  */
 Object.defineProperty(global.Function.prototype, `toS`, {
@@ -130,9 +94,6 @@ Object.defineProperty(global.Function.prototype, `toS`, {
     enumerable: false
 });
 
-const nJvlnsLine = `\n          `;
-const nJsLine = `\n                  `;
-
 /*------------------------------------- CONFIG REPL CONTEXT --------------------------------------*/
 /**
  * Properties to bind to repl context (available at top level in repl)
@@ -141,31 +102,30 @@ const ctxProps = {
     // Shell
     cd,
     ls: {val: ls, mutable: true},
-    mv,
-    ln,
-    mkdir,
-    cat,
-    chmod,
-    cp,
-    dirs,
-    echo,
-    exec,
-    exit,
-    find,
-    grep,
-    uniq,
-    which,
-    touch,
-    test,
-    sort,
-    tail,
-    head,
-    popd,
-    pushd,
-    // pwd,
-    rm,
-    sed,
-    [`set`]: set,
+    cat: shellJS.cat,
+    chmod: shellJS.chmod,
+    cp: shellJS.cp,
+    dirs: shellJS.dirs,
+    echo: shellJS.echo,
+    exec: shellJS.exec,
+    exit: shellJS.exit,
+    find: shellJS.find,
+    grep: shellJS.grep,
+    uniq: shellJS.uniq,
+    which: shellJS.which,
+    touch: shellJS.touch,
+    test: shellJS.test,
+    sort: shellJS.sort,
+    tail: shellJS.tail,
+    head: shellJS.head,
+    ln: shellJS.ln,
+    mkdir: shellJS.mkdir,
+    mv: shellJS.mv,
+    popd: shellJS.popd,
+    pushd: shellJS.pushd,
+    rm: shellJS.rm,
+    sed: shellJS.sed,
+    ['set']: shellJS.set,
 
     // Helper libraries
     lodash,
@@ -182,19 +142,30 @@ const ctxProps = {
     // @ts-ignore
     getArgs: inspect.getArgs,
     keys,
+    packageJson: packageJson ? packageJson : null,
+
+    // Overwritable temp storage
     ...augmentations
 };
 
-// package.json content
-if (packageJson) ctxProps.packageJson = packageJson;
+/**
+ * Add global temp for convenience (gets used by REPL).
+ */
+global.temp = null;
 
+/*----------------------------------------- DESCRIPTIONS -----------------------------------------*/
+/**
+ * Object containing all __repl_description__ data (for use in help text).
+ * @type Record<string, string>
+ */
 const descAdditions = Object.keys(augmentations).reduce((acc, key) => {
     if (augmentations[key].__repl_description__) acc[key] = augmentations[key].__repl_description__;
     return acc;
-}, {})
+}, {});
 
 /**
- * Extra descriptions for bound properties
+ * Extra descriptions for bound properties.
+ * @type Record<string, string>
  */
 const descriptions = {
     _: `Result of last command`,
@@ -202,23 +173,37 @@ const descriptions = {
     m_: `mad-utils alias`,
     // TODO pwd description not showing
     pwd: `Show current working directory (like pwd in bash)`,
+    temp: `Predefined temporary global variable used for storing results of function calls`,
     Function: `Standard global has added property 'toS' for displaying as a clean string`,
-    ...descAdditions,
+    ...descAdditions
 };
 
-// Attach props to REPL (repl is in repl setup)
-const r = bindPropsToRepl(ctxProps, descriptions, `> `);
+/**
+ * Attach props to REPL (note: this is done in the bindPropsToRepl function), including all
+ * descriptions. Return repl object with all properties bound to its global namespace.
+ */
+const repl = bindPropsToRepl(ctxProps, descriptions, `> `);
 
+/*--------------------------------------- CUSTOM COMMANDS ----------------------------------------*/
 /**
  * Filtered repl history without numbered lines
  */
-r.defineCommand(`help_added_globals`, {
+repl.defineCommand(`help_added_globals`, {
     help: `Display custom objects/functions added to the top-level context`,
     action: () => displayProps(ctxProps, descriptions)
 });
 
-Reflect.defineProperty(r.context, 'pwd', {
-    get: function() {
+/**
+ * Add alias for exit
+ */
+repl.defineCommand(`quit`, {
+    help: `Exit the REPL (alias)`,
+    action: () => process.exit()
+});
+
+/*---------------------------------------- ADD TO CONTEXT ----------------------------------------*/
+Reflect.defineProperty(repl.context, 'pwd', {
+    get: function () {
         return process.cwd();
     }
 });
