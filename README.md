@@ -1,5 +1,5 @@
 ----------------------------------------------------------------------------------------------------
-# node-cli-plus
+# node-repl-plus
 
 Enhanced CLI configurable for a specific project.
 Install and place .nodeplus file in project root directory to configure.
