@@ -9,7 +9,7 @@ Install and place .nodeplus file in project root directory to configure.
 Setup
 -----
 
-1. npm install node-cli-plus --save-dev
+1. npm install node-repl-plus --save-dev
 
 2. Create a .nodeplus file in the project root. See below for basic example.
 

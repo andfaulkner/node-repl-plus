@@ -62,7 +62,7 @@ const r = repl.start({
 const replHistory = require('@andfaulkner/repl.history');
 
 const pwd = process.env.PWD;
-const historyFile = path.join(pwd, `.node_cli_plus_history`);
+const historyFile = path.join(pwd, `.node_repl_plus_history`);
 replHistory(r, historyFile);
 
 console.log(`process.env.PWD:`, process.env.PWD);

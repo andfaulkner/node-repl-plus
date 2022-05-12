@@ -1,3 +1,11 @@
+1.3.0 (2022-05-12)
+==================
+-   Rename package to node-repl-plus
+-   Rename history file to `.node_repl_plus_history` (to match new package name)
+
+
+
+----------------------------------------------------------------------------------------------------
 1.2.0 (2022-05-11)
 ==================
 Commands
