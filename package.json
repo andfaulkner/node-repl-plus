@@ -24,7 +24,7 @@
     "jsdom": "^19.0.0",
     "lodash": "^4.17.21",
     "mad-logs": "^11.4.0",
-    "mad-utils": "^0.93.1",
+    "mad-utils": "^0.96.0",
     "natural-orderby": "^2.0.3",
     "shelljs": "^0.8.5"
   },
