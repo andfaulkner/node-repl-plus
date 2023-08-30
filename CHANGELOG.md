@@ -1,3 +1,10 @@
+1.5.0 (2023-08-30)
+==================
+-   Set `IN_REPL` value on process.env to be writeable, configurable, and enumerable
+    -   Required to work with newer versions of node.js (18+) 
+
+
+----------------------------------------------------------------------------------------------------
 1.4.2 (2023-01-10)
 ==================
 -   Upgrade mad-utils from v0.93 to v0.96
