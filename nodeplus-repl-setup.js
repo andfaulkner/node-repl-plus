@@ -24,6 +24,7 @@ const {orderBy} = require('natural-orderby');
 const {
     // @ts-ignore
     defineImmutableProp,
+    defineProp,
     getArgNames,
     inspectKeyTree,
     isRegexString,
@@ -71,7 +72,7 @@ console.log(`historyFile:`, historyFile);
 
 // Add IN_REPL property to repl environment
 // Acts as identifier that REPL is currently running
-defineImmutableProp(r.context.process.env, `IN_REPL`, true);
+defineProp(r.context.process.env, `IN_REPL`, true, 'deletable', true);
 
 /**
  * Display props bound to repl context, with descriptions for each specified in
